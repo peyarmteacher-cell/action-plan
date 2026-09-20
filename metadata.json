@@ -1,0 +1,8 @@
+{
+  "name": "ระบบบริหารโครงการและงบประมาณโรงเรียน (Multi-School)",
+  "description": "ระบบบริหารโครงการและงบประมาณโรงเรียนแบบ Multi-School รองรับ Super Admin, Admin โรงเรียน (รหัส SMIS 8 หลัก) และครูผู้สอน (เลขบัตร ปชช. 13 หลัก) พร้อมระบบเขียนโครงการด้วย AI",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

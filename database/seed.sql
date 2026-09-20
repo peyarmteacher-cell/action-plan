@@ -1,0 +1,101 @@
+-- ==========================================================
+-- ข้อมูลเริ่มต้นระบบ (Clean Seed Data - ไม่มีข้อมูลตัวอย่าง)
+-- สำหรับระบบบริหารโครงการและงบประมาณโรงเรียน Multi-School
+-- พร้อมสำหรับการเริ่มใช้งานจริงของโรงเรียนทันที
+-- ==========================================================
+
+SET FOREIGN_KEY_CHECKS = 0;
+SET NAMES utf8mb4;
+
+-- 1. ผู้ดูแลระบบส่วนกลาง (Super Admin)
+-- รหัสผ่านเริ่มต้น: admin (hash: $2y$10$wT0X8Cj4f3R2Z3p1O5m6e.s7A9b1C2d3E4f5G6h7I8j9K0l1M2n3O)
+INSERT INTO `super_admins` (`id`, `username`, `password_hash`, `full_name`, `email`, `phone`) VALUES
+(1, 'superadmin', '$2y$10$wT0X8Cj4f3R2Z3p1O5m6e.s7A9b1C2d3E4f5G6h7I8j9K0l1M2n3O', 'ผู้ดูแลระบบส่วนกลาง (Super Admin)', 'superadmin@obec.go.th', '02-288-5555')
+ON DUPLICATE KEY UPDATE `username`=VALUES(`username`);
+
+-- 2. ข้อมูลโรงเรียนเริ่มต้น (พร้อมให้บันทึกข้อมูลจริง)
+INSERT INTO `schools` (
+  `id`, `school_code`, `smis_code`, `is_active`, `school_key`, `admin_username`, `admin_password_plain`,
+  `name`, `address`, `subdistrict`, `district`, `province`, `zipcode`, `affiliation`, `education_area`,
+  `fiscal_year`, `director_name`, `phone`, `email`, `allow_project_submission`, `notes`
+) VALUES (
+  1, '10400100', '10400100', 1, 'SCH-10400100', '10400100', '123456',
+  'โรงเรียนต้นแบบการศึกษาขั้นพื้นฐาน', '', '', '', '', '',
+  'สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน (สพฐ.)', 'สำนักงานเขตพื้นที่การศึกษา',
+  2568, '', '', '', 1, 'พร้อมสำหรับการเริ่มใช้งานจริง'
+) ON DUPLICATE KEY UPDATE `name`=VALUES(`name`);
+
+-- 3. ปีงบประมาณ 2568
+INSERT INTO `fiscal_years` (`id`, `school_id`, `year`, `is_active`, `start_date`, `end_date`, `total_students`, `teacher_count`) VALUES
+(1, 1, 2568, 1, '2024-10-01', '2025-09-30', 0, 0)
+ON DUPLICATE KEY UPDATE `year`=VALUES(`year`);
+
+-- 4. ผู้ดูแลระบบโรงเรียน (Admin)
+-- ใช้รหัส SMIS 8 หลักเป็น username และรหัสผ่านเริ่มต้น 123456 บังคับเปลี่ยนรหัสผ่านในครั้งแรก (must_change_password = 1)
+INSERT INTO `users` (
+  `id`, `school_id`, `username`, `citizen_id`, `password_hash`, `full_name`, `email`, `role`,
+  `department`, `position`, `phone`, `must_change_password`
+) VALUES (
+  1, 1, '10400100', NULL, '$2y$10$wT0X8Cj4f3R2Z3p1O5m6e.s7A9b1C2d3E4f5G6h7I8j9K0l1M2n3O',
+  'ผู้ดูแลระบบโรงเรียน (Admin)', 'admin_10400100@obec.mail.go.th', 'admin',
+  'ฝ่ายบริหารงานงบประมาณ', 'หัวหน้างานแผนงานและงบประมาณ', '', 1
+) ON DUPLICATE KEY UPDATE `username`=VALUES(`username`);
+
+-- 5. ระดับชั้นนักเรียน (เริ่มต้น 0 คน พร้อมให้กรอกจริงหรือนำเข้าจาก Excel)
+INSERT INTO `students` (`id`, `school_id`, `fiscal_year_id`, `grade_level`, `stage`, `male_count`, `female_count`, `total_count`) VALUES
+(1, 1, 1, 'อนุบาล 1', 'อนุบาล', 0, 0, 0),
+(2, 1, 1, 'อนุบาล 2', 'อนุบาล', 0, 0, 0),
+(3, 1, 1, 'อนุบาล 3', 'อนุบาล', 0, 0, 0),
+(4, 1, 1, 'ประถมศึกษาปีที่ 1', 'ประถม', 0, 0, 0),
+(5, 1, 1, 'ประถมศึกษาปีที่ 2', 'ประถม', 0, 0, 0),
+(6, 1, 1, 'ประถมศึกษาปีที่ 3', 'ประถม', 0, 0, 0),
+(7, 1, 1, 'ประถมศึกษาปีที่ 4', 'ประถม', 0, 0, 0),
+(8, 1, 1, 'ประถมศึกษาปีที่ 5', 'ประถม', 0, 0, 0),
+(9, 1, 1, 'ประถมศึกษาปีที่ 6', 'ประถม', 0, 0, 0)
+ON DUPLICATE KEY UPDATE `grade_level`=VALUES(`grade_level`);
+
+-- 6. หมวดรายรับมาตรฐาน สพฐ. (อัตราเกณฑ์คำนวณอัตโนมัติตามยอดนักเรียนจริง)
+INSERT INTO `revenues` (`id`, `school_id`, `fiscal_year_id`, `category`, `item_name`, `rate_per_head`, `eligible_count`, `calculated_amount`, `is_custom_rate`, `note`) VALUES
+(1, 1, 1, 'subsidy', '1. เงินอุดหนุนรายหัว (การจัดการศึกษาขั้นพื้นฐาน)', 1980.00, 0, 0.00, 0, 'เฉลี่ยรวม อ.1-3 (1,800 บ.) และ ป.1-6 (2,050 บ.)'),
+(2, 1, 1, 'subsidy', '2. เงินอุดหนุนรายหัวส่วนเพิ่ม (Top Up) โรงเรียนคุณภาพ', 500.00, 0, 0.00, 0, 'สนับสนุนพัฒนาคุณภาพการศึกษา สพฐ.'),
+(3, 1, 1, 'welfare', '3. ค่าหนังสือเรียน (โครงการเรียนฟรี 15 ปี)', 650.00, 0, 0.00, 0, 'จัดสรรตามเกณฑ์ระดับการศึกษา สพฐ.'),
+(4, 1, 1, 'welfare', '4. ค่าเครื่องแบบนักเรียน (2 ชุด/คน/ปี)', 380.00, 0, 0.00, 0, 'อนุบาล 325 บ., ประถม 400 บ.'),
+(5, 1, 1, 'welfare', '5. ค่าอุปกรณ์การเรียน (2 ภาคเรียน/ปี)', 440.00, 0, 0.00, 0, 'อนุบาล 290 บ., ประถม 440 บ.'),
+(6, 1, 1, 'activity', '6. เงินกิจกรรมพัฒนาคุณภาพผู้เรียน (4 กิจกรรมหลัก สพฐ.)', 480.00, 0, 0.00, 0, 'วิชาการ, คุณธรรม/ลูกเสือ, ทัศนศึกษา, ICT'),
+(7, 1, 1, 'lunch', '7. เงินอุดหนุนค่าอาหารกลางวัน (อปท.)', 27.00, 0, 0.00, 0, 'คำนวณ 27 บาท/วัน จำนวน 200 วันทำการ'),
+(8, 1, 1, 'other', '8. เงินรายได้สถานศึกษา / เงินบริจาค', 0.00, 0, 0.00, 1, 'เงินระดมทรัพยากรและเงินบริจาคเพื่อการศึกษา')
+ON DUPLICATE KEY UPDATE `item_name`=VALUES(`item_name`);
+
+-- 7. กรอบการจัดสรรงบประมาณตาม 4 ฝ่าย สพฐ. + งบกลาง
+INSERT INTO `budget_allocations` (`id`, `school_id`, `fiscal_year_id`, `department_name`, `percentage`, `allocated_amount`, `spent_amount`, `remaining_amount`, `color_hex`, `description`) VALUES
+(1, 1, 1, 'ฝ่ายบริหารงานวิชาการ', 45.00, 0.00, 0.00, 0.00, '#2563eb', 'พัฒนาหลักสูตร การจัดการเรียนการสอน สื่อ นวัตกรรม'),
+(2, 1, 1, 'ฝ่ายบริหารงานงบประมาณ', 15.00, 0.00, 0.00, 0.00, '#0284c7', 'การเงิน บัญชี พัสดุ สินทรัพย์ และแผนงานงบประมาณ'),
+(3, 1, 1, 'ฝ่ายบริหารงานบุคคล', 10.00, 0.00, 0.00, 0.00, '#059669', 'พัฒนาครู วินัย สวัสดิการ และการสรรหาบุคลากร'),
+(4, 1, 1, 'ฝ่ายบริหารงานทั่วไป', 20.00, 0.00, 0.00, 0.00, '#d97706', 'อาคารสถานที่ สิ่งแวดล้อม และสัมพันธ์ชุมชน'),
+(5, 1, 1, 'งบกลาง / สำรองจ่ายฉุกเฉิน', 10.00, 0.00, 0.00, 0.00, '#7c3aed', 'กรณีภัยพิบัติและกิจกรรมเร่งด่วน')
+ON DUPLICATE KEY UPDATE `department_name`=VALUES(`department_name`);
+
+-- 8. 4 กิจกรรมพัฒนาคุณภาพผู้เรียนตามระเบียบ สพฐ.
+INSERT INTO `learner_activities` (`id`, `school_id`, `fiscal_year_id`, `activity_name`, `percentage`, `allocated_amount`, `spent_amount`, `remaining_amount`, `note`) VALUES
+(1, 1, 1, '1. กิจกรรมวิชาการ (ค่ายพัฒนาทักษะวิชาการ)', 30.00, 0.00, 0.00, 0.00, 'ค่ายวิชาการและสัปดาห์ห้องสมุด'),
+(2, 1, 1, '2. กิจกรรมคุณธรรม จริยธรรม และลูกเสือ-เนตรนารี', 25.00, 0.00, 0.00, 0.00, 'ค่ายพุทธบุตรและเข้าค่ายลูกเสือ'),
+(3, 1, 1, '3. กิจกรรมทัศนศึกษา แหล่งเรียนรู้นอกสถานที่', 25.00, 0.00, 0.00, 0.00, 'แหล่งเรียนรู้และพิพิธภัณฑ์'),
+(4, 1, 1, '4. การจัดการเรียนรู้ ICT และเทคโนโลยีดิจิทัล', 20.00, 0.00, 0.00, 0.00, 'ทักษะ Coding และสื่อดิจิทัล')
+ON DUPLICATE KEY UPDATE `activity_name`=VALUES(`activity_name`);
+
+-- 9. ยุทธศาสตร์การศึกษาขั้นพื้นฐาน (สพฐ.)
+INSERT INTO `strategies` (`id`, `school_id`, `fiscal_year_id`, `code`, `name`, `description`) VALUES
+(1, 1, 1, 'ยุทธศาสตร์ที่ 1', 'จัดการศึกษาเพื่อความมั่นคงของสังคมและประเทศชาติ', 'ส่งเสริมคุณธรรม จริยธรรม และศาสตร์พระราชา'),
+(2, 1, 1, 'ยุทธศาสตร์ที่ 2', 'พัฒนาคุณภาพผู้เรียนและสร้างขีดความสามารถในการแข่งขัน', 'ยกระดับผลสัมฤทธิ์ วิทยาศาสตร์ ภาษา และ Coding'),
+(3, 1, 1, 'ยุทธศาสตร์ที่ 3', 'พัฒนาและเสริมสร้างศักยภาพครูและบุคลากร', 'Active Learning และสมรรถนะครูมืออาชีพ'),
+(4, 1, 1, 'ยุทธศาสตร์ที่ 4', 'สร้างโอกาสและความเสมอภาคทางการศึกษาเพื่อลดความเหลื่อมล้ำ', 'ดูแลช่วยเหลือนักเรียนยากจนและเรียนรวม'),
+(5, 1, 1, 'ยุทธศาสตร์ที่ 5', 'พัฒนาประสิทธิภาพระบบการบริหารจัดการสถานศึกษา', 'ธรรมาภิบาลและความโปร่งใส')
+ON DUPLICATE KEY UPDATE `code`=VALUES(`code`);
+
+-- ฐานข้อมูลว่างสำหรับ projects, project_expenses, budget_transactions (ไม่มี mock data ใดๆ ทั้งสิ้น)
+TRUNCATE TABLE `projects`;
+TRUNCATE TABLE `project_expenses`;
+TRUNCATE TABLE `budget_transactions`;
+TRUNCATE TABLE `action_plans`;
+
+SET FOREIGN_KEY_CHECKS = 1;

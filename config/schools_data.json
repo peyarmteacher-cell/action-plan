@@ -1,0 +1,21 @@
+[
+  {
+    "id": 1,
+    "schoolCode": "10400100",
+    "smisCode": "10400100",
+    "isActive": true,
+    "schoolKey": "SCH-10400100",
+    "adminUsername": "10400100",
+    "adminPasswordPlain": "123456",
+    "name": "โรงเรียนต้นแบบการศึกษาขั้นพื้นฐาน",
+    "province": "",
+    "educationArea": "สำนักงานเขตพื้นที่การศึกษา",
+    "directorName": "",
+    "phone": "",
+    "email": "",
+    "studentCount": 0,
+    "projectCount": 0,
+    "totalBudget": 0,
+    "notes": "โรงเรียนพร้อมสำหรับการบันทึกข้อมูลจริง"
+  }
+]
