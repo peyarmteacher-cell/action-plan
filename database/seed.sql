@@ -92,10 +92,10 @@ INSERT INTO `strategies` (`id`, `school_id`, `fiscal_year_id`, `code`, `name`, `
 (5, 1, 1, 'ยุทธศาสตร์ที่ 5', 'พัฒนาประสิทธิภาพระบบการบริหารจัดการสถานศึกษา', 'ธรรมาภิบาลและความโปร่งใส')
 ON DUPLICATE KEY UPDATE `code`=VALUES(`code`);
 
--- ฐานข้อมูลว่างสำหรับ projects, project_expenses, budget_transactions (ไม่มี mock data ใดๆ ทั้งสิ้น)
-TRUNCATE TABLE `projects`;
-TRUNCATE TABLE `project_expenses`;
-TRUNCATE TABLE `budget_transactions`;
-TRUNCATE TABLE `action_plans`;
+-- ล้างข้อมูลโครงการเก่า (หากมี) เพื่อให้ระบบเริ่มต้นเป็นฐานข้อมูลว่าง สะอาด 100%
+DELETE FROM `action_plans`;
+DELETE FROM `project_expenses`;
+DELETE FROM `budget_transactions`;
+DELETE FROM `projects`;
 
 SET FOREIGN_KEY_CHECKS = 1;
