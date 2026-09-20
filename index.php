@@ -8,6 +8,18 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Load dashboard directly to prevent 404 or redirect issues
-require_once __DIR__ . '/dashboard.php';
+// หน้าแรกต้องเป็นหน้า login เข้าสู่ระบบ หากยังไม่ได้ล็อกอิน
+if (empty($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// หากล็อกอินแล้ว ให้เปิดไปยังหน้าตามบทบาทผู้ใช้งาน
+if (($_SESSION['user_role'] ?? '') === 'superadmin') {
+    header('Location: super_admin.php');
+    exit;
+} else {
+    header('Location: dashboard.php');
+    exit;
+}
 

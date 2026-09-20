@@ -59,7 +59,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             unset($_SESSION['pending_user_role']);
         }
 
-        header('Location: dashboard.php?msg=pwd_updated');
+        if (($_SESSION['user_role'] ?? '') === 'superadmin') {
+            header('Location: super_admin.php?msg=pwd_updated');
+        } else {
+            header('Location: dashboard.php?msg=pwd_updated');
+        }
         exit;
     }
 }

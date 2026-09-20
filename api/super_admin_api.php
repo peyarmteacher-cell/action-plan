@@ -309,6 +309,12 @@ try {
             }
             break;
 
+        case 'switch_school':
+            $schoolId = (int)($input['school_id'] ?? $_GET['school_id'] ?? 1);
+            $_SESSION['school_id'] = $schoolId;
+            echo json_encode(['success' => true, 'message' => 'สลับโรงเรียนเรียบร้อยแล้ว', 'school_id' => $schoolId]);
+            break;
+
         default:
             echo json_encode(['success' => false, 'message' => 'Invalid action: ' . $action]);
             break;

@@ -65,9 +65,16 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-slate-900 line-clamp-1 sm:text-base">
-              {school.name}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 id="header-school-name-display" className="text-sm font-bold text-slate-900 line-clamp-1 sm:text-base">
+                {school.name}
+              </h1>
+              {school.smisCode && (
+                <span className="hidden md:inline-block px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                  SMIS: {school.smisCode}
+                </span>
+              )}
+            </div>
             <p className="text-xs text-slate-500 hidden sm:block">
               {school.affiliation} • {school.educationArea}
             </p>

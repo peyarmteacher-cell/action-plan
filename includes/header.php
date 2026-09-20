@@ -6,14 +6,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Auto demo login if not logged in (to ensure immediate access on any PHP server)
+// ตรวจสอบการเข้าสู่ระบบ หากยังไม่ได้ล็อกอิน ให้ไปที่หน้า login.php ทันที
 if (empty($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1;
-    $_SESSION['username'] = 'admin';
-    $_SESSION['full_name'] = 'นายพิเชษฐ์ ปัญญาวงศ์ (หัวหน้างานแผนงาน)';
-    $_SESSION['user_role'] = 'admin';
-    $_SESSION['school_id'] = 1;
-    $_SESSION['fiscal_year_id'] = 1;
+    header('Location: login.php');
+    exit;
 }
 
 $school = getSchoolData();
@@ -82,10 +78,27 @@ $isDbConnected = Database::isConnected();
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
                 <div class="flex items-center gap-3">
-                    <img src="<?= htmlspecialchars($school['logo_url']) ?>" alt="Logo" class="w-9 h-9 rounded-lg object-cover border border-slate-200 shadow-xs">
+                    <?php if (!empty($school['logo_url'])): ?>
+                        <img src="<?= htmlspecialchars($school['logo_url']) ?>" alt="Logo" class="w-9 h-9 rounded-lg object-cover border border-slate-200 shadow-xs">
+                    <?php else: ?>
+                        <div class="w-9 h-9 rounded-lg bg-blue-900 text-amber-300 font-bold flex items-center justify-center text-xs shadow-xs">
+                            <i data-lucide="building-2" class="w-5 h-5"></i>
+                        </div>
+                    <?php endif; ?>
                     <div>
-                        <h1 class="text-sm font-bold text-slate-900 leading-tight"><?= htmlspecialchars($school['name']) ?></h1>
-                        <p class="text-xs text-slate-500 hidden sm:block"><?= htmlspecialchars($school['affiliation']) ?> • ปีงบประมาณ <?= $fiscalYear['year'] ?></p>
+                        <div class="flex items-center gap-2">
+                            <h1 id="header-school-name" class="text-sm sm:text-base font-bold text-slate-900 leading-tight">
+                                <?= htmlspecialchars($school['name']) ?>
+                            </h1>
+                            <?php if (!empty($school['smis_code'])): ?>
+                                <span class="hidden sm:inline-block text-[10px] font-mono font-bold bg-blue-50 text-blue-800 border border-blue-200 px-1.5 py-0.5 rounded">
+                                    SMIS: <?= htmlspecialchars($school['smis_code']) ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        <p class="text-xs text-slate-500 hidden sm:block">
+                            <?= htmlspecialchars($school['affiliation'] ?? 'สพฐ.') ?> • <?= htmlspecialchars($school['education_area'] ?? '') ?>
+                        </p>
                     </div>
                 </div>
             </div>

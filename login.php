@@ -12,9 +12,13 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// หากล็อกอินอยู่แล้ว ให้ไปที่ Dashboard
+// หากล็อกอินอยู่แล้ว ให้ไปตามบทบาท
 if (!empty($_SESSION['user_id'])) {
-    header('Location: dashboard.php');
+    if (($_SESSION['user_role'] ?? '') === 'superadmin') {
+        header('Location: super_admin.php');
+    } else {
+        header('Location: dashboard.php');
+    }
     exit;
 }
 
@@ -111,7 +115,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['user_role'] = $user['role'];
                     $_SESSION['school_id'] = $user['school_id'] ?? 1;
                     
-                    header('Location: dashboard.php');
+                    if ($user['role'] === 'superadmin') {
+                        header('Location: super_admin.php');
+                    } else {
+                        header('Location: dashboard.php');
+                    }
                     exit;
                 } else {
                     $error = 'รหัสผ่านไม่ถูกต้อง';

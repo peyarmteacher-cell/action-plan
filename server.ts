@@ -555,6 +555,46 @@ app.patch('/api/super-admin/schools/:id/toggle', (req, res) => {
   });
 });
 
+// 7.1 Update School Data (Used by Admin and Super Admin)
+app.put(['/api/super-admin/schools/:id', '/api/school/:id', '/api/school'], (req, res) => {
+  const schoolId = Number(req.params.id || req.body?.id || 1);
+  const schools = getStoredSchools();
+  const schoolIndex = schools.findIndex((s: any) => s.id === schoolId);
+
+  if (schoolIndex === -1) {
+    return res.status(404).json({ success: false, message: 'ไม่พบโรงเรียนที่ระบุ' });
+  }
+
+  const existing = schools[schoolIndex];
+  const updated = {
+    ...existing,
+    name: req.body.name ? req.body.name.trim() : existing.name,
+    schoolCode: req.body.schoolCode || req.body.school_code || existing.schoolCode,
+    smisCode: req.body.smisCode || req.body.smis_code || existing.smisCode,
+    affiliation: req.body.affiliation || existing.affiliation,
+    educationArea: req.body.educationArea || req.body.education_area || existing.educationArea,
+    directorName: req.body.directorName || req.body.director_name || existing.directorName,
+    address: req.body.address !== undefined ? req.body.address : existing.address,
+    subdistrict: req.body.subdistrict !== undefined ? req.body.subdistrict : existing.subdistrict,
+    district: req.body.district !== undefined ? req.body.district : existing.district,
+    province: req.body.province !== undefined ? req.body.province : existing.province,
+    zipcode: req.body.zipcode !== undefined ? req.body.zipcode : existing.zipcode,
+    phone: req.body.phone !== undefined ? req.body.phone : existing.phone,
+    email: req.body.email !== undefined ? req.body.email : existing.email,
+    website: req.body.website !== undefined ? req.body.website : existing.website,
+    logoUrl: req.body.logoUrl || req.body.logo_url || existing.logoUrl,
+  };
+
+  schools[schoolIndex] = updated;
+  saveStoredSchools(schools);
+
+  res.json({
+    success: true,
+    message: `บันทึกข้อมูลโรงเรียน "${updated.name}" สำเร็จ`,
+    school: updated,
+  });
+});
+
 // 8. Delete School
 app.delete('/api/super-admin/schools/:id', (req, res) => {
   const schoolId = Number(req.params.id);
@@ -749,6 +789,30 @@ app.all(['/api/super_admin_api.php', '/super_admin_api.php'], (req, res) => {
       }
       saveStoredSchools(schools);
       return res.json({ success: true, message: 'ลบโรงเรียนออกจากระบบเรียบร้อยแล้ว' });
+    }
+
+    case 'update_school': {
+      const schoolId = Number(req.body?.school_id || req.body?.id || 1);
+      const schools = getStoredSchools();
+      const school = schools.find((s: any) => s.id === schoolId);
+      if (!school) {
+        return res.status(404).json({ success: false, message: 'ไม่พบโรงเรียนที่ระบุ' });
+      }
+      if (req.body?.name) school.name = req.body.name.trim();
+      if (req.body?.education_area) school.educationArea = req.body.education_area.trim();
+      if (req.body?.province) school.province = req.body.province.trim();
+      if (req.body?.director_name) school.directorName = req.body.director_name.trim();
+      if (req.body?.phone) school.phone = req.body.phone.trim();
+      if (req.body?.admin_password_plain) school.adminPasswordPlain = req.body.admin_password_plain.trim();
+      saveStoredSchools(schools);
+      return res.json({ success: true, message: 'บันทึกการแก้ไขข้อมูลโรงเรียนสำเร็จ' });
+    }
+
+    case 'switch_school': {
+      const schoolId = Number(req.body?.school_id || req.query.school_id || 1);
+      const schools = getStoredSchools();
+      const school = schools.find((s: any) => s.id === schoolId);
+      return res.json({ success: true, school: school || schools[0] });
     }
 
     default:

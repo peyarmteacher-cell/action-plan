@@ -45,7 +45,13 @@ import { Lock, LogIn, Building2 } from 'lucide-react';
 
 export default function App() {
   // App state
-  const [school, setSchool] = useState<School>(initialSchoolData);
+  const [school, setSchool] = useState<School>(() => {
+    try {
+      const saved = localStorage.getItem('active_school');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return initialSchoolData;
+  });
   const [fiscalYears, setFiscalYears] = useState<FiscalYear[]>(initialFiscalYears);
   const [activeFiscalYear, setActiveFiscalYear] = useState<FiscalYear>(
     initialFiscalYears.find((fy) => fy.isActive) || initialFiscalYears[0]
@@ -66,8 +72,8 @@ export default function App() {
   const [isPhpModalOpen, setIsPhpModalOpen] = useState(false);
   const [selectedProjectIdForExpenses, setSelectedProjectIdForExpenses] = useState<number | undefined>(undefined);
 
-  // Auth screen state
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  // Auth screen state (Login First enforced)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginUsername, setLoginUsername] = useState('10400100');
   const [loginPassword, setLoginPassword] = useState('123456');
   const [loginError, setLoginError] = useState('');
@@ -140,6 +146,11 @@ export default function App() {
     setCurrentUser(found);
     setIsLoggedIn(true);
     setLoginError('');
+    if (found.role === 'superadmin') {
+      setActiveTab('super_admin');
+    } else {
+      setActiveTab('dashboard');
+    }
   };
 
   // Handle First-Time Login Password Change submission
@@ -172,6 +183,11 @@ export default function App() {
     setCurrentUser(updatedUser);
     setPendingPasswordChangeUser(null);
     setIsLoggedIn(true);
+    if (updatedUser.role === 'superadmin') {
+      setActiveTab('super_admin');
+    } else {
+      setActiveTab('dashboard');
+    }
     setPasswordChangeError('');
     alert('เปลี่ยนรหัสผ่านสำเร็จ ยินดีต้อนรับเข้าสู่ระบบ!');
   };
@@ -179,6 +195,21 @@ export default function App() {
   // Handle Logout
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setLoginPassword('');
+    setLoginError('');
+  };
+
+  // Handle Update School with persistence & backend sync
+  const handleUpdateSchool = (updated: School) => {
+    setSchool(updated);
+    try {
+      localStorage.setItem('active_school', JSON.stringify(updated));
+    } catch (e) {}
+    fetch(`/api/super-admin/schools/${updated.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated),
+    }).catch(() => {});
   };
 
   // Sync revenue amounts when students change
@@ -524,7 +555,7 @@ export default function App() {
               <SchoolInfoView
                 school={school}
                 activeFiscalYear={activeFiscalYear}
-                onUpdateSchool={(updated) => setSchool(updated)}
+                onUpdateSchool={handleUpdateSchool}
               />
             )}
 
@@ -662,6 +693,9 @@ export default function App() {
                 currentSchool={school}
                 onSelectSchool={(selected) => {
                   setSchool(selected);
+                  try {
+                    localStorage.setItem('active_school', JSON.stringify(selected));
+                  } catch (e) {}
                 }}
               />
             )}

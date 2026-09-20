@@ -16,6 +16,11 @@ export const SchoolInfoView: React.FC<SchoolInfoViewProps> = ({
   const [formData, setFormData] = useState<School>({ ...school });
   const [savedSuccess, setSavedSuccess] = useState(false);
 
+  // Sync formData whenever school prop changes
+  React.useEffect(() => {
+    setFormData({ ...school });
+  }, [school]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -28,7 +33,7 @@ export const SchoolInfoView: React.FC<SchoolInfoViewProps> = ({
     e.preventDefault();
     onUpdateSchool(formData);
     setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+    setTimeout(() => setSavedSuccess(false), 4000);
   };
 
   return (
@@ -41,13 +46,13 @@ export const SchoolInfoView: React.FC<SchoolInfoViewProps> = ({
             <span>ข้อมูลพื้นฐานสถานศึกษา</span>
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            ข้อมูลประจำโรงเรียนสำหรับการออกรายงาน แผนปฏิบัติการ และเอกสารราชการ
+            กำหนดชื่อโรงเรียนและข้อมูลพื้นฐาน (ชื่อโรงเรียนจะแสดงที่ส่วนหัว Header ของทุกหน้าในระบบ)
           </p>
         </div>
         {savedSuccess && (
-          <div className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg">
-            <Check className="h-4 w-4" />
-            <span>บันทึกข้อมูลเรียบร้อยแล้ว</span>
+          <div className="flex items-center gap-1.5 text-xs text-emerald-800 bg-emerald-50 border border-emerald-300 px-3.5 py-2 rounded-xl shadow-xs animate-in fade-in">
+            <Check className="h-4 w-4 text-emerald-600 shrink-0" />
+            <span className="font-semibold">บันทึกเรียบร้อย: อัปเดตชื่อโรงเรียนบนส่วนหัว (Header) ของระบบแล้ว</span>
           </div>
         )}
       </div>

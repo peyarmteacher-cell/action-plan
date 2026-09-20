@@ -289,7 +289,11 @@ if ($pdo) {
                                             <?php endif; ?>
                                         </td>
                                         <td class="py-3 px-3 text-center">
-                                            <div class="flex items-center justify-center gap-1">
+                                            <div class="flex items-center justify-center gap-1.5">
+                                                <button onclick="switchToSchool(<?= $sch['id'] ?>)" class="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-[11px] font-bold flex items-center gap-1 transition-colors" title="สลับไปจัดการข้อมูลของโรงเรียนนี้">
+                                                    <i data-lucide="arrow-right-left" class="w-3 h-3"></i>
+                                                    <span>เข้าจัดการ</span>
+                                                </button>
                                                 <button onclick="editSchool(<?= htmlspecialchars(json_encode($sch)) ?>)" class="p-1 text-slate-400 hover:text-amber-400 hover:bg-slate-700 rounded-md" title="แก้ไข">
                                                     <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                                                 </button>
@@ -613,6 +617,23 @@ if ($pdo) {
                 if (data.success) location.reload();
             } catch (err) {
                 alert('เกิดข้อผิดพลาด: ' + err.message);
+            }
+        }
+
+        async function switchToSchool(schoolId) {
+            try {
+                const data = await safeFetchJson('api/super_admin_api.php?action=switch_school', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ school_id: schoolId })
+                });
+                if (data.success) {
+                    window.location.href = 'dashboard.php';
+                } else {
+                    alert(data.message || 'ไม่สามารถสลับโรงเรียนได้');
+                }
+            } catch (err) {
+                alert('เกิดข้อผิดพลาดในการสลับโรงเรียน: ' + err.message);
             }
         }
 
